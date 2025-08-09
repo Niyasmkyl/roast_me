@@ -1,96 +1,63 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# Roast Me 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: DevPloy
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
+- Team Lead: Niyas S Makkiyil - CET
+- Member 2: Janbaas Jamal K K - CET
 - Member 3: [Name] - [College]
 
 ### Project Description
-[2-3 lines about what your project does]
+A website which roasts your photo with a twist
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+Some people have fantasy of getting roasted we fullfill it
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+We just take a photo of you and a roast pop up in the web
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- HTML,CSS,JS
+- Node
 
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
 
 ### Implementation
 For Software:
 # Installation
-[commands]
-
+Install node
+Clone this repo
 # Run
-[commands]
+cd roast-me/frontend/meroast/roastcam
+npm install
+node server.js
 
 ### Project Documentation
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+!<img width="640" height="480" alt="roast" src="https://github.com/user-attachments/assets/fa7266fc-ed25-498a-9bc8-8d5aecf0a151" />
+A Image got after roasting
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
-
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
-
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
-
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
 
 ### Project Demo
 # Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
+https://drive.google.com/file/d/1tBlIF2hsBuC_fJUSnYbY3O9QZhR9TamJ/view?usp=sharing
+Full Working of our web
 
-# Additional Demos
-[Add any extra demo materials/links]
+
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- Janbaas:  Camera and ai
+- Niyas: rest of the front end
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
