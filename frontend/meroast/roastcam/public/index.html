@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Roast Cam</title>
+  <style>
+    :root { --bg:#0b0b0f; --accent:#0ea5e9; color-scheme: dark; }
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#05111a,#000);color:#fff;display:flex;flex-direction:column;align-items:center;padding:24px;}
+    h1{margin:6px 0 12px;font-size:20px}
+    .frame{width:340px;max-width:94%;display:flex;flex-direction:column;align-items:center;}
+    video, canvas{
+      width:320px !important;
+      height:320px !important;
+      border-radius:12px;
+      object-fit:cover;
+      background:#000;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);
+      display:block;
+      margin:auto;
+    }
+    .controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    button{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
+    button#start{background:var(--accent);color:#051426}
+    button#capture{background:#f97316;color:#081219}
+    button#stop{background:#ef4444;color:#fff}
+    #status{margin-top:10px;font-size:13px;color:#9fb7c7;min-height:18px;text-align:center}
+    #downloadLink{margin-top:10px;color:var(--accent);display:none}
+    .spinner{display:none;margin-top:10px}
+    .spinner.show{display:block}
+  </style>
+</head>
+<body>
+  <h1>📸 Roast Cam — </h1>
+  <div class="frame">
+    <video id="preview" autoplay playsinline muted></video>
+    <canvas id="canvas" style="display:none"></canvas>
+
+    <div class="controls">
+      <button id="start">Start Camera</button>
+      <button id="capture">Capture & Roast</button>
+      <button id="stop">Stop</button>
+    </div>
+
+    <div id="status">Status: idle</div>
+    <div id="spinner" class="spinner">🍳 Roasting... please wait</div>
+    <a id="downloadLink" download="roast.png">Delete the photo</a>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById('start');
+    const captureBtn = document.getElementById('capture');
+    const stopBtn = document.getElementById('stop');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const status = document.getElementById('status');
+    const spinner = document.getElementById('spinner');
+    const downloadLink = document.getElementById('downloadLink');
+
+    let mediaStream = null;
+
+    function setStatus(txt){ status.textContent = 'Status: ' + txt; }
+
+    async function startCamera(){
+      try{
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        preview.srcObject = mediaStream;
+        preview.style.display = 'block';
+        canvas.style.display = 'none';
+        downloadLink.style.display = 'none';
+        setStatus('camera running');
+      } catch (err){
+        console.error(err);
+        alert('Could not access camera: ' + (err.message || err));
+        setStatus('error');
+      }
+    }
+
+    function stopCamera(){
+      if(mediaStream){
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+      }
+      setStatus('stopped');
+    }
+
+    // wrap text to fit canvas width
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = text.split(' ');
+      let line = '';
+      let lines = [];
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line.trim());
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+      for (let i = 0; i < lines.length; i++) {
+        ctx.strokeText(lines[i], x, y + (i * lineHeight));
+        ctx.fillText(lines[i], x, y + (i * lineHeight));
+      }
+    }
+
+    function drawRoastText(ctx, text){
+      // font size relative to canvas width
+      const fontSize = Math.max(28, Math.floor(canvas.width / 10));
+      ctx.lineWidth = Math.max(6, Math.floor(fontSize / 8));
+      ctx.font = `bold ${fontSize}px Impact, 'Arial Black', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'black';
+
+      // compute center y for multiline
+      const maxWidth = canvas.width * 0.9;
+      // approximate line height
+      const lineHeight = fontSize * 1.05;
+
+      // measure and compute start y so text block is vertically centered
+      // quick estimate: split by words and measure using a temporary loop
+      const words = text.split(' ');
+      let testCtx = ctx;
+      let lines = [];
+      let line = '';
+      for (let n=0;n<words.length;n++){
+        const testLine = line + words[n] + ' ';
+        if (testCtx.measureText(testLine).width > maxWidth && n>0){
+          lines.push(line.trim());
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+      const blockHeight = lines.length * lineHeight;
+      const startY = (canvas.height / 2) - (blockHeight / 2) + (lineHeight/2);
+
+      // dark translucent rectangle behind text
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(canvas.width*0.02, startY - lineHeight*0.6, canvas.width*0.96, blockHeight + lineHeight*0.3);
+
+      // draw lines with stroke then fill
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'black';
+      for (let i=0;i<lines.length;i++){
+        const y = startY + (i * lineHeight);
+        ctx.strokeText(lines[i].toUpperCase(), canvas.width/2, y);
+        ctx.fillText(lines[i].toUpperCase(), canvas.width/2, y);
+      }
+    }
+
+    async function captureAndRoast(){
+      if (!mediaStream){
+        alert('Start the camera first!');
+        return;
+      }
+
+      // Ensure video metadata loaded
+      if (!preview.videoWidth || !preview.videoHeight){
+        await new Promise(resolve => preview.onloadedmetadata = resolve);
+      }
+
+  // fixed canvas size (never adjust)
+  canvas.width = 320;
+  canvas.height = 320;
+  canvas.style.width = '320px';
+  canvas.style.height = '320px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
+
+      // temporarily show canvas and hide video
+  // Hide video and show canvas to avoid layout gap
+  preview.style.display = 'none';
+  canvas.style.display = 'block';
+      stopCamera();
+
+      // show spinner
+      spinner.classList.add('show');
+      setStatus('sending to roast service...');
+
+      // convert to blob and send to server
+      canvas.toBlob(async (blob) => {
+        try {
+          const fd = new FormData();
+          fd.append('photo', blob, 'photo.png');
+
+          const resp = await fetch('/roast', { method: 'POST', body: fd });
+          const data = await resp.json();
+
+          const roastText = (data && data.roast) ? data.roast : "No roast returned";
+          setStatus('roast received');
+
+          // show roast as popup instead of drawing on canvas
+          alert(roastText);
+
+          // update download link
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.style.display = 'inline-block';
+        } catch (err) {
+          console.error(err);
+          alert('Error while roasting: ' + (err.message || err));
+          setStatus('error while roasting');
+        } finally {
+          spinner.classList.remove('show');
+        }
+      }, 'image/png');
+    }
+
+    startBtn.addEventListener('click', startCamera);
+  stopBtn.addEventListener('click', () => { stopCamera(); preview.style.display='block'; canvas.style.display='none'; downloadLink.style.display='none'; });
+    captureBtn.addEventListener('click', captureAndRoast);
+  </script>
+</body>
+</html>
