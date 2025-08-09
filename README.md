@@ -11,7 +11,6 @@
 ### Team Members
 - Team Lead: Niyas S Makkiyil - CET
 - Member 2: Janbaas Jamal K K - CET
-- Member 3: [Name] - [College]
 
 ### Project Description
 A website which roasts your photo with a twist
